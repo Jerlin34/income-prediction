@@ -1,0 +1,96 @@
+import pandas as pd
+import numpy as np
+import pickle
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import GradientBoostingClassifier # Or KNeighborsClassifier if that's your final choice
+from sklearn.neighbors import KNeighborsClassifier # Import KNN as well
+
+# --- 1. Load Data ---
+# Assuming adult.csv is in the same directory or provide the correct path
+try:
+    data = pd.read_csv("adult.csv")
+except FileNotFoundError:
+    print("Error: adult.csv not found. Please ensure the dataset is in the correct directory.")
+    exit()
+
+# --- 2. Data Cleaning and Preprocessing (as per your notebook) ---
+
+# Replace '?' with 'Others'
+data['workclass'].replace({'?': 'Others'}, inplace=True)
+data['occupation'].replace({'?': 'Others'}, inplace=True)
+data['native-country'].replace({'?': 'Others'}, inplace=True) # Assuming native-country also had '?'
+
+# Handle outliers in 'age'
+data = data[(data['age'] <= 75) & (data['age'] >= 17)]
+
+# Remove specific categories from 'workclass' and 'education'
+data = data[data['workclass'] != 'Without-pay']
+data = data[data['workclass'] != 'Never-worked']
+data = data[data['education'] != '1st-4th']
+data = data[data['education'] != '5th-6th']
+data = data[data['education'] != 'Preschool']
+
+# Drop 'education' column as 'educational-num' provides similar info
+data.drop(columns=['education'], inplace=True)
+
+# Define features (X) and target (y)
+X = data.drop(columns=['income'])
+y = data['income']
+
+# --- 3. Define Preprocessing Steps for Pipeline ---
+
+# Identify categorical and numerical columns
+categorical_features = X.select_dtypes(include='object').columns
+numerical_features = X.select_dtypes(include=['int64', 'float64']).columns
+
+# Create preprocessing pipelines for numerical and categorical features
+numerical_transformer = StandardScaler() # Using StandardScaler, as often preferred in pipelines
+# If you specifically want MinMaxScaler, change this line:
+# numerical_transformer = MinMaxScaler()
+
+categorical_transformer = OneHotEncoder(handle_unknown='ignore') # handle_unknown='ignore' is crucial for deployment
+
+# Create a preprocessor using ColumnTransformer
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', numerical_transformer, numerical_features),
+        ('cat', categorical_transformer, categorical_features)
+    ])
+
+# --- 4. Define the Model ---
+# Choose your final model. Based on the best_model.pkl snippet, it's likely GradientBoostingClassifier.
+# If you want to use KNN as per your initial analysis, uncomment the KNN line and comment the GBC line.
+# model_estimator = KNeighborsClassifier(n_neighbors=5) # Example KNN with 5 neighbors
+model_estimator = GradientBoostingClassifier(random_state=42) # Example GradientBoostingClassifier
+
+# --- 5. Create the Full Pipeline ---
+# This pipeline will first preprocess the data, then apply the chosen model
+full_pipeline = Pipeline(steps=[('preprocessor', preprocessor),
+                                ('classifier', model_estimator)])
+
+# --- 6. Split Data for Training and Testing ---
+# Use stratify=y for classification to maintain class distribution
+xtrain, xtest, ytrain, ytest = train_test_split(X, y, test_size=0.2, random_state=23, stratify=y)
+
+# --- 7. Train the Pipeline ---
+print("Training the model pipeline...")
+full_pipeline.fit(xtrain, ytrain)
+print("Model training complete.")
+
+# --- 8. Save the Trained Pipeline (best_algo.pkl) ---
+# This saves the entire model, including preprocessing steps
+with open('best_algo.pkl', 'wb') as file:
+    pickle.dump(full_pipeline, file)
+print("Trained model saved as 'best_algo.pkl'")
+
+# --- 9. Save the Test Data (test_data.pkl) ---
+# This is needed by your Streamlit app for performance metrics
+with open('test_data.pkl', 'wb') as file:
+    pickle.dump((xtest, ytest), file)
+print("Test data saved as 'test_data.pkl'")
+
+print("\nFiles 'best_algo.pkl' and 'test_data.pkl' have been created.")
+print("You can now run your Streamlit app (`streamlit run app.py`).")
