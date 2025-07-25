@@ -20,7 +20,7 @@ except FileNotFoundError:
 st.set_page_config(page_title="Employee Salary Predictor", page_icon="💼", layout="centered")
 
 st.title("Will You Earn More Than 50K?")
-st.markdown("Enter your details and we'll predict if you're likely to earn **above or below 50K** 💵")
+st.markdown("Enter your details and we'll predict if you're likely to earn **above or below 50K** �")
 
 # Sidebar Inputs
 st.sidebar.header("Modify Your Profile")
@@ -44,7 +44,7 @@ input_dict = {
     'age': [age],
     'workclass': [workclass],
     'fnlwgt': [100000],  # placeholder - ensure this matches your training data's fnlwgt handling
-    'education-num': [educational_num], # Renamed to match your notebook's column name
+    'educational-num': [educational_num], # Renamed to match your notebook's column name
     'marital-status': [marital],
     'occupation': [occupation],
     'relationship': [relationship],
@@ -80,7 +80,7 @@ pretty_keys = {
     'age': 'Age',
     'workclass': 'Workclass',
     'fnlwgt': 'FNLWGT',
-    'education-num': 'Education Level (Num)', # Updated key
+    'educational-num': 'Education Level (Num)', # Updated key
     'marital-status': 'Marital Status',
     'occupation': 'Occupation',
     'relationship': 'Relationship',
@@ -116,7 +116,10 @@ if st.button("PREDICT"):
         st.stop()
 
     # Salary Result
-    result_text = ">50K" if prediction == '>50K' else "≤50K" # Ensure this matches your model's output labels
+    # Ensure this matches your model's output labels.
+    # If your model outputs 0 and 1, adjust this line:
+    # result_text = ">50K" if prediction == 1 else "≤50K"
+    result_text = ">50K" if prediction == '>50K' else "≤50K"
     st.subheader(f"Predicted Income: **{result_text}**")
 
     # Personalized Advice
@@ -232,5 +235,5 @@ else:
 
 # Footer
 st.markdown("---")
-st.caption("Made by Avanthika | Powered by Scikit-learn + Streamlit + Plotly")
-
+st.caption("Made by Jerlin | Powered by Scikit-learn + Streamlit + Plotly")
+�
