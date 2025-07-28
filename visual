@@ -1,0 +1,36 @@
+import matplotlib.pyplot as plt
+
+# Predicted result from your KNN model
+predicted_class = '>50K'   # or '<=50K'
+confidence = 0.85  # e.g., 85% confidence
+
+# Setup colors based on predicted class
+if predicted_class == '>50K':
+    box_color = 'lightgreen'
+    border_color = 'green'
+else:
+    box_color = 'mistyrose'
+    border_color = 'red'
+
+# Create figure and axis
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.axis('off')
+
+# Define box properties
+box_style = dict(boxstyle="round,pad=1", facecolor=box_color, edgecolor=border_color, linewidth=2)
+
+# Format text to display
+text = (
+    f"Predicted Income Category:\n\n"
+    f"{predicted_class}\n\n"
+    f"Confidence Level: {int(confidence * 100)}%"
+)
+
+# Add text box in the center
+ax.text(0.5, 0.5, text, ha='center', va='center', fontsize=16, bbox=box_style)
+
+# Add title
+plt.title("Adult Income Prediction Result", fontsize=18, weight='bold')
+
+plt.tight_layout()
+plt.show()
